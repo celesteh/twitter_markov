@@ -16,13 +16,15 @@ users:
         app: example_app_name
 
         # If your bot is based on another account, the screen name of that account
-        parent: screen_name
+        parent: False #screen_name
+
+        peer: True
 
         # Location of a text file, with one tweet (or other sentence) per line
         # This can also be set on the command line.
         # This can be a single item or a list
         #
-        corpus: tests/data/tweets.txt
+        corpus: ./corpus.txt
 
         # How many tweets should we check to make sure we're not repeating something we already tweeted?
         checkback: 100
@@ -31,7 +33,7 @@ users:
         # Higher values are slower and hew closer to the corpus
         # Lower values are faster and more oddball
         #
-        state_size: 3
+        state_size: 2
 
         # Words to never tweet
         # These will be added to a built-in blacklist, taken from https://github.com/dariusk/wordfilter
@@ -39,21 +41,31 @@ users:
         blacklist:
             - badword
             - evilword
+            - cuck
+            - cuckservative
+            - bummer
+            - NeverCruz
+            - CruzSexScandle
+            - CruzSexScandal
+            - thug
+            - BlackLivesMatter
+            - AllLivesMatter
+            - Diversity
 
         # With these set to True, we won't tweet these types or learn them from its parent
         #
         no_retweets: False
-        no_replies: False
+        no_replies: True
 
         # With these set, these types of tweets won't be tweeted
         # They will still be fed into the corpus, they will just
         # be filtered out of results
         #
         no_hashtags: False
-        no_urls: False
-        no_mentions: False
+        no_urls: True
+        no_mentions: True
         # Symbols are stock ticker abbreviations like $APPL
-        no_symbols: False
+        no_symbols: True
 
         # With these set, the text will be stripped of these entities before being fed to the brain
         # For instance, if filter_hashtags is set,
@@ -62,8 +74,8 @@ users:
         # Take care. Changing the corpus in this way can lead to strange results.
         #
         filter_hashtags: False
-        filter_media: False
-        filter_urls: False
+        filter_media: True
+        filter_urls: True
         filter_mentions: False
         filter_symbols: False
 

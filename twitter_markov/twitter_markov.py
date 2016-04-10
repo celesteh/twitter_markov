@@ -23,6 +23,7 @@ import markovify.text
 import twitter_bot_utils as tbu
 from wordfilter import Wordfilter
 from . import checking
+import unicodedata
 
 LEVENSHTEIN_LIMIT = 0.70
 
@@ -124,7 +125,8 @@ class TwitterMarkov(object):
     @property
     def recently_tweeted(self):
         if len(self._recently_tweeted) == 0:
-            recent_tweets = self.api.user_timeline(self.screen_name, count=self.config.get('checkback', 20))
+            #recent_tweets = self.api.user_timeline(self.screen_name, count=self.config.get('checkback', 20))
+            recent_tweets = self.api.user_timeline()
             self._recently_tweeted = [x.text for x in recent_tweets]
 
         return self._recently_tweeted
@@ -220,6 +222,54 @@ class TwitterMarkov(object):
         self.log.debug('TwitterMarkov: %s', text)
 
         return text
+
+    def learn_peer(self, corpus=None, peer=None):
+        '''Add recent tweets from @parent to corpus'''
+        peer = peer or self.config.get('peer')
+        corpus = corpus or self.corpora[0]
+
+        if not peer:
+            self.log.debug('Cannot teach: missing parent or tweets')
+            return
+
+        tweets = self.api.home_timeline(count=150)
+        #self.api.user_timeline(parent, since_id=self.api.last_tweet)
+        #print(tweets[0])
+
+        try:
+            gen = checking.generator(tweets,
+                                     no_mentions=self.config.get('filter_mentions'),
+                                     no_hashtags=self.config.get('filter_hashtags'),
+                                     no_urls=self.config.get('filter_urls'),
+                                     no_media=self.config.get('filter_media'),
+                                     no_symbols=self.config.get('filter_symbols'),
+                                     no_badwords=self.config.get('filter_parent_badwords', True),
+                                     no_retweets=self.config.get('no_retweets'),
+                                     no_replies=self.config.get('no_replies')
+                                    )
+
+            #print str(gen)
+            #print 'foo'
+            #self.log.error(gen.next())
+
+            self.log.debug('%s is learning', corpus)
+
+            with open(corpus, 'a') as f:
+                for tweet in gen:
+                    try:
+                        #utweet = unicode(tweet, "utf-8")
+                        #f.write(str(tweet)+'\n')
+                        utweet = unicodedata.normalize('NFKD', tweet).encode('ascii','ignore')
+                        f.write(utweet+'\n')
+                    except UnicodeEncodeError as e:
+                        self.log.error(tweet)
+                #f.writelines(tweet+ '\n' for tweet in gen)
+
+        except IOError as e:
+            self.log.error('Learning failed for %s', corpus)
+            self.log.error(e)
+
+
 
     def learn_parent(self, corpus=None, parent=None):
         '''Add recent tweets from @parent to corpus'''
