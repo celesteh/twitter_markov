@@ -1,6 +1,13 @@
 twitter markov
 ==============
 
+## Trump
+This is a forked version to run a pro-Trump account. You will still need to follow the instructions for installation and to build a corpus
+
+To update your Trump bot, after you have updated your bots.yaml file, have a corpus and have posted at least 1 tweet, `python TrumpBot.py`
+
+## Help for the library
+
 Create markov chain ("_ebooks") accounts on Twitter
 
 The audience for this library is those with at least basic Python experience. Before you set this up, you'll need:
@@ -122,7 +129,7 @@ Methods:
 
 ### Example
 
-This assumes a corpus file (`corpus.txt`) and config file (`config.yaml`). 
+This assumes a corpus file (`corpus.txt`) and config file (`config.yaml`).
 
 ````python
 from twitter_markov import TwitterMarkov

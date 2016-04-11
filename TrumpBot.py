@@ -30,9 +30,9 @@ def massage(tweet):
     tweet = re.sub('[0-9][0-9][0-9][0-9]?', '', tweet) #no phone numbers
     tweet = re.sub('^\W', '', tweet)
     tweet = re.sub('^\s+', '', tweet)
-    tweet = re.sub('\s+\.+', '', tweet)
-    tweet = re.sub('\s+\/+', '', tweet)
-    tweet = re.sub('\s+\W+', ' ', tweet)
+    tweet = re.sub('\s+\.+', ' ', tweet)
+    tweet = re.sub('\s+\/+', ' ', tweet)
+    tweet = re.sub('\s+[^a-z0-9A-Z_\-\#\$]+', ' ', tweet)
     tweet = re.sub('\.\.\.+\s*\Z', '', tweet)
 
     tweet = re.sub('\s\s+', ' ', tweet)
@@ -73,6 +73,7 @@ def check(tweet):
 def hashtags(tweet):
 
     tweet = re.sub('\s+NYC', ' #NYC', tweet)
+    tweet = re.sub('\s+MAGA', ' #MAGA', tweet)
     tweet = re.sub('\s+PA', ' #PA', tweet)
     tweet = re.sub('\s+NRA', ' #NRA', tweet)
     tweet = re.sub('\s+GOP', ' #GOP', tweet)
@@ -150,6 +151,12 @@ def learn():
     tm.learn_peer()
     time.sleep(1)
     tm.learn_search(search='nuclear war')
+    time.sleep(1)
+    tm.learn_search(search='nuclear bomb')
+    time.sleep(1)
+    tm.learn_search(search='nuclear missile')
+    time.sleep(1)
+    tm.learn_search(search='nuclear arms')
     time.sleep(1)
     tm.learn_search(search='proliferation')
     time.sleep(1)
