@@ -34,6 +34,7 @@ class TwitterMarkov(object):
 
     default_model = None
     _recently_tweeted = []
+    last_tweet = None
 
     def __init__(self, screen_name, corpus=None, **kwargs):
         '''
@@ -87,6 +88,9 @@ class TwitterMarkov(object):
         self.wordfilter = Wordfilter()
         self.wordfilter.add_words(blacklist)
 
+        self.last_tweet = (self.api.user_timeline(count=1))[0]
+        self.last_tweet = self.last_tweet.id
+
         if kwargs.get('learn', True):
             self.learn_parent()
 
@@ -131,6 +135,8 @@ class TwitterMarkov(object):
 
         return self._recently_tweeted
 
+
+
     def check_tweet(self, text):
         text = text.strip().lower()
 
@@ -140,6 +146,7 @@ class TwitterMarkov(object):
 
         if self.wordfilter.blacklisted(text):
             self.log.info("Rejected (blacklisted)")
+            self.log.info(text)
             return False
 
         for line in self.recently_tweeted:
@@ -224,7 +231,7 @@ class TwitterMarkov(object):
         return text
 
     def learn_peer(self, corpus=None, peer=None):
-        '''Add recent tweets from @parent to corpus'''
+        '''Add recent tweets from peers to corpus'''
         peer = peer or self.config.get('peer')
         corpus = corpus or self.corpora[0]
 
@@ -232,7 +239,7 @@ class TwitterMarkov(object):
             self.log.debug('Cannot teach: missing parent or tweets')
             return
 
-        tweets = self.api.home_timeline(count=150)
+        tweets = self.api.home_timeline(count=150, since_id=self.last_tweet)
         #self.api.user_timeline(parent, since_id=self.api.last_tweet)
         #print(tweets[0])
 
@@ -260,6 +267,7 @@ class TwitterMarkov(object):
                         #utweet = unicode(tweet, "utf-8")
                         #f.write(str(tweet)+'\n')
                         utweet = unicodedata.normalize('NFKD', tweet).encode('ascii','ignore')
+                        utweet = re.sub('\n', ' ', utweet)
                         f.write(utweet+'\n')
                     except UnicodeEncodeError as e:
                         self.log.error(tweet)
@@ -270,17 +278,66 @@ class TwitterMarkov(object):
             self.log.error(e)
 
 
+    def learn_search(self, search=None, corpus=None):
+        '''Add recent tweets from search to corpus'''
+        #search = 'nuclear war'
+        search = search or self.config.get('search')
+        corpus = corpus or self.corpora[0]
+
+        if not search:
+            self.log.debug('Cannot teach: missing search or tweets')
+            return
+
+        #tweets = self.api.home_timeline(count=150)
+        #self.api.user_timeline(parent, since_id=self.api.last_tweet)
+        #print(tweets[0])
+        tweets =  self.api.search(search, since_id=self.last_tweet)
+
+        try:
+            gen = checking.generator(tweets,
+                                     no_mentions=self.config.get('filter_mentions'),
+                                     no_hashtags=self.config.get('filter_hashtags'),
+                                     no_urls=self.config.get('filter_urls'),
+                                     no_media=self.config.get('filter_media'),
+                                     no_symbols=self.config.get('filter_symbols'),
+                                     no_badwords=self.config.get('filter_parent_badwords', True),
+                                     no_retweets=self.config.get('no_retweets'),
+                                     no_replies=self.config.get('no_replies')
+                                    )
+
+            #print str(gen)
+            #print 'foo'
+            #self.log.error(gen.next())
+
+            self.log.debug('%s is learning', corpus)
+
+            with open(corpus, 'a') as f:
+                for tweet in gen:
+                    try:
+                        #utweet = unicode(tweet, "utf-8")
+                        #f.write(str(tweet)+'\n')
+                        utweet = unicodedata.normalize('NFKD', tweet).encode('ascii','ignore')
+                        utweet = re.sub('\n', ' ', utweet)
+                        f.write(utweet+'\n')
+                    except UnicodeEncodeError as e:
+                        self.log.error(tweet)
+                #f.writelines(tweet+ '\n' for tweet in gen)
+
+        except IOError as e:
+            self.log.error('Learning failed for %s', corpus)
+            self.log.error(e)
+
 
     def learn_parent(self, corpus=None, parent=None):
         '''Add recent tweets from @parent to corpus'''
         parent = parent or self.config.get('parent')
         corpus = corpus or self.corpora[0]
 
-        if not parent or not self.api.last_tweet:
+        if not parent or not last_tweet:
             self.log.debug('Cannot teach: missing parent or tweets')
             return
 
-        tweets = self.api.user_timeline(parent, since_id=self.api.last_tweet)
+        tweets = self.api.user_timeline(parent, since_id=self.last_tweet)
 
         try:
             gen = checking.generator(tweets,

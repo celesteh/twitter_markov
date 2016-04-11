@@ -20,11 +20,15 @@ users:
 
         peer: True
 
+        search: 'nuclear war'
+
         # Location of a text file, with one tweet (or other sentence) per line
         # This can also be set on the command line.
         # This can be a single item or a list
         #
-        corpus: ./corpus.txt
+        corpus: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/corpus.txt
+        history: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/history.txt
+        gifs: /home/celesteh/Dropbox/debbie/gifs
 
         # How many tweets should we check to make sure we're not repeating something we already tweeted?
         checkback: 100
@@ -33,7 +37,7 @@ users:
         # Higher values are slower and hew closer to the corpus
         # Lower values are faster and more oddball
         #
-        state_size: 2
+        state_size: 4
 
         # Words to never tweet
         # These will be added to a built-in blacklist, taken from https://github.com/dariusk/wordfilter
@@ -45,12 +49,49 @@ users:
             - cuckservative
             - bummer
             - NeverCruz
+            - Cruz
             - CruzSexScandle
             - CruzSexScandal
             - thug
             - BlackLivesMatter
             - AllLivesMatter
             - Diversity
+            - Hispanic
+            - Mexican
+            - Islam
+            - Muslim
+            - Muslims
+            - Islamic
+            - Illegal
+            - Migrant
+            - Refugee
+            - Rapefugee
+            - Immigrant
+            - Obama
+            - NoIllegals
+            - NoRefugees
+            - Gay
+            - Homosexual
+            - CruzCrew
+            - paedophile
+            - pedophile
+            - gamergate
+            - interracial
+            - racial
+            - paedobritain
+            - paedo
+            - pedo
+            - migration
+            - LyingTed
+            - Bernie
+            - Bern
+            - FeelTheBern
+            - MeatFreeMonday
+            - Vegan
+            - BLM
+            - Blacks
+            - Asain
+            - Chinese
 
         # With these set to True, we won't tweet these types or learn them from its parent
         #
@@ -63,7 +104,7 @@ users:
         #
         no_hashtags: False
         no_urls: True
-        no_mentions: True
+        no_mentions: False
         # Symbols are stock ticker abbreviations like $APPL
         no_symbols: True
 
@@ -76,8 +117,8 @@ users:
         filter_hashtags: False
         filter_media: True
         filter_urls: True
-        filter_mentions: False
+        filter_mentions: True
         filter_symbols: False
 
         # By default, wordfilter is applied to the parent's tweets.
-        filter_parent_badwords: True
+        filter_parent_badwords: False
