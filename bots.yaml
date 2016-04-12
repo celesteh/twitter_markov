@@ -63,6 +63,7 @@ users:
             - Muslims
             - Islamic
             - Illegal
+            - Illegals
             - Migrant
             - Refugee
             - Rapefugee
@@ -83,6 +84,7 @@ users:
             - pedo
             - migration
             - LyingTed
+            - LyinTed
             - Bernie
             - Bern
             - FeelTheBern
@@ -91,7 +93,9 @@ users:
             - BLM
             - Blacks
             - Asain
+            - Asian
             - Chinese
+            - JimCrow
 
         # With these set to True, we won't tweet these types or learn them from its parent
         #

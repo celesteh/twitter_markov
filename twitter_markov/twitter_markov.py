@@ -197,7 +197,7 @@ class TwitterMarkov(object):
         max_len = min(140, max_len)
         model = self.models[model or self.default_model]
 
-        eols = '.?!/:;,'
+        eols = '.!?'#'.?!/:;,'
         text = ''
 
         while True:
@@ -212,7 +212,7 @@ class TwitterMarkov(object):
 
             # Add eol delimiter if one is missing
             if sent[-1] not in eols and (sent[-2] not in eols and sent[-1] not in u'"\'’”〞❞'):
-                sent = sent + choice('.!?')
+                sent = sent + choice('?..!!!') #'.!?'
 
             if len(text) + len(sent) < max_len - 1:
                 text = (text + ' ' + sent).strip()
