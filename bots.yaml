@@ -27,6 +27,7 @@ users:
         # This can be a single item or a list
         #
         corpus: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/corpus.txt
+        issues: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/issues.txt
         history: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/history.txt
         gifs: /home/celesteh/Dropbox/debbie/gifs
 
@@ -37,7 +38,11 @@ users:
         # Higher values are slower and hew closer to the corpus
         # Lower values are faster and more oddball
         #
-        state_size: 4
+        state_size: 6
+
+        corpus_size: 25000
+        history_size: 250
+        tweet_size: 116
 
         # Words to never tweet
         # These will be added to a built-in blacklist, taken from https://github.com/dariusk/wordfilter
@@ -45,8 +50,12 @@ users:
         blacklist:
             - badword
             - evilword
+            - fucking
+            - fuck
+            - cunt
             - cuck
             - cuckservative
+            - CUCKANADA
             - bummer
             - NeverCruz
             - Cruz
@@ -58,10 +67,22 @@ users:
             - Diversity
             - Hispanic
             - Mexican
+            - BLM
+            - Blacks
+            - Asain
+            - Asian
+            - Chinese
+            - JimCrow
+            - Negro
+            - jihadists
+            - jihadi
+            - jihad
             - Islam
             - Muslim
             - Muslims
             - Islamic
+            - ShariaLaw
+            - Sharia
             - Illegal
             - Illegals
             - Migrant
@@ -72,7 +93,11 @@ users:
             - NoIllegals
             - NoRefugees
             - Gay
+            - Lesbian
+            - Transexual
+            - Transsexual
             - Homosexual
+            - LGBT
             - CruzCrew
             - paedophile
             - pedophile
@@ -82,6 +107,8 @@ users:
             - paedobritain
             - paedo
             - pedo
+            - perv
+            - Rape
             - migration
             - LyingTed
             - LyinTed
@@ -90,12 +117,6 @@ users:
             - FeelTheBern
             - MeatFreeMonday
             - Vegan
-            - BLM
-            - Blacks
-            - Asain
-            - Asian
-            - Chinese
-            - JimCrow
 
         # With these set to True, we won't tweet these types or learn them from its parent
         #

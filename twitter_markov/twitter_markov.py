@@ -192,9 +192,10 @@ class TwitterMarkov(object):
         if not self.dry_run:
             self.api.update_status(status=tweet, in_reply_to_status_id=in_reply)
 
-    def compose(self, model=None, max_len=140, **kwargs):
+    def compose(self, model=None, max_len=None, **kwargs):
         '''Format a tweet with a reply.'''
-        max_len = min(140, max_len)
+
+        max_len = min(140, (max_len or self.config.get('tweet_size')))
         model = self.models[model or self.default_model]
 
         eols = '.!?'#'.?!/:;,'
@@ -267,7 +268,7 @@ class TwitterMarkov(object):
                         #utweet = unicode(tweet, "utf-8")
                         #f.write(str(tweet)+'\n')
                         utweet = unicodedata.normalize('NFKD', tweet).encode('ascii','ignore')
-                        utweet = re.sub('\n', ' ', utweet)
+                        utweet = re.sub('\s+', ' ', utweet)
                         f.write(utweet+'\n')
                     except UnicodeEncodeError as e:
                         self.log.error(tweet)
@@ -317,7 +318,7 @@ class TwitterMarkov(object):
                         #utweet = unicode(tweet, "utf-8")
                         #f.write(str(tweet)+'\n')
                         utweet = unicodedata.normalize('NFKD', tweet).encode('ascii','ignore')
-                        utweet = re.sub('\n', ' ', utweet)
+                        utweet = re.sub('\s+', ' ', utweet)
                         f.write(utweet+'\n')
                     except UnicodeEncodeError as e:
                         self.log.error(tweet)
