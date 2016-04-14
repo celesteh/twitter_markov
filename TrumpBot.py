@@ -6,14 +6,35 @@ import time
 import re
 import Levenshtein
 import unicodedata
+import pynotify
+import enchant
 
-terms = ['#Trump2016', 'WomenForTrump', 'GenderEquity', '#Equality','global warming', 'climate hoax', 'climate hustle', 'nuclear war', 'nuclear bomb', 'hydrogen bomb', 'atomic bomb', 'warhead', 'ballistic missile','nuclear missile', 'nuke', 'nuclear arms', 'arms race','proliferation', 'launch codes', '#MAGA', '#PresidentTrump']
+
+terms = ['#Trump2016', 'WomenForTrump', 'GenderEquity', '#Equality', 'climate change', 'global warming', 'climate hoax', 'climate hustle', 'nuclear war', 'nuclear bomb', 'hydrogen bomb', 'atomic bomb', 'warhead', 'ballistic missile','nuclear missile', 'nuke', 'nuclear arms', 'arms race','proliferation', 'launch codes', '#MAGA', '#PresidentTrump']
 # 'climate change',
 
 global unembelished
+global dict
 unembelished = ''
 
+def defrag(tweet):
+
+    # find and kill floating word fragments
+    print 'de fragging'
+    global dict
+    words = tweet.split()
+    case = re.compile('^\s*[^\#\@0-9][a-z]+[\.\,\;\!\?\'\" \t\n]*\Z') #all caps and numbers get a pass
+    single = re.compile('^\s*[A-Za-z][\.\,\;\!\?\'\" \t\n]*\Z') #one letter
+    for word in words:
+        if case.search(word) or single.search(word):
+            text = re.sub('\W+', '', word)
+            if not dict.check(text):
+                print word
+                tweet = tweet.replace(word, ' ')
+    return tweet
+
 def massage(tweet):
+
     tweet = tweet.replace('great', 'grate') #Quirk
     tweet = tweet.replace('Great', 'Grate')
     tweet = tweet.replace('GREAT', 'GRATE')
@@ -120,6 +141,7 @@ def hashtags(tweet):
     tweet = re.sub('\s+New\s+York\s+Times', ' #NYTimes', tweet, flags=re.I)
     tweet = re.sub('\s+President\s*Trump', ' #PresidentTrump', tweet, count=1, flags=re.I)
     tweet = re.sub('\s+Only\s*Trump', ' #OnlyTrump', tweet, count=1, flags=re.I)
+    tweet = tweet.replace(' TRUMP', ' #TRUMP') # all caps special case
     tweet = re.sub('\s+Trump', ' #Trump', tweet, count=1, flags=re.I)
     tweet = re.sub('\s+tcot', ' #tcot ', tweet, flags=re.I)
     tweet = re.sub('\s+POTUS', ' #POTUS', tweet, flags=re.I)
@@ -154,7 +176,7 @@ def hashtags(tweet):
     for state in states:
         print state
         state = re.sub('\s+', '', state)
-        if state not in ('OF', 'AN', 'TO', 'QA', 'NO', 'ON', 'PM', 'AM', 'IT', 'DO'): #short words
+        if state not in ('OF', 'AN', 'TO', 'QA', 'NO', 'ON', 'PM', 'AM', 'IT', 'DO', 'MR', 'GO'): #short words
             tweet = tweet.replace(state, ' #'+state+' ')
 
     tweet = re.sub(r'\s+[\#\.\?\!\'\"]+\s+',' ', tweet) #floating in spaces
@@ -163,13 +185,13 @@ def hashtags(tweet):
 
 
     # If we've got extra space, let's add some #trump tags!
-    if (len(tweet) <= 92) and ('#MakeAmericaGrateAgain' not in tweet) and random.choice(True, False):
+    if (len(tweet) <= 92) and ('#MakeAmericaGrateAgain' not in tweet) and ('#Trump' in tweet):
         tweet = tweet + '\n#MakeAmericaGrateAgain'
-    if (len(tweet) <= 92):
+    if (len(tweet) <= 92) and ('#Trump' not in tweet):
         tweet = tweet + '\n#Trump would do better'
 
     if (len(tweet) <= 97):
-        if ('@realDonaldTrump' in tweet) or random.choice(True, False):
+        if ('@realDonaldTrump' in tweet) or ('#Trump' not in tweet):
             tweet = tweet + '\n#WhatWouldTrumpDo'
         else:
             tweet = tweet + '\n@realDonaldTrump'
@@ -192,9 +214,9 @@ def hashtags(tweet):
         trump = re.compile('\#Trump\W+')
         #maga = re.compile('\#MAGA[\s\.\,\!\?\;]+')
         if (trump.search(tweet)) and ('#MAGA' not in tweet):
-            tweet = tweet + ' #MAGA'
+            tweet = tweet + '\n#MAGA'
         else:
-            tweet = tweet + ' #Trump'
+            tweet = tweet + '\n#Trump'
 
     return tweet
 #--
@@ -253,7 +275,7 @@ def learn():
 
 
     tm.learn_peer()
-    time.sleep(1)
+    time.sleep(5)
 
     for query in terms:
         print query
@@ -269,14 +291,44 @@ def learn():
 
 # --
 
+def coherence(state_sz):
+    probability = random.random() #random.triangular()
+    if(probability > 0.9):
+        state_sz = max(2, state_sz -4)
+    else:
+        if(probability > 0.8):
+            state_sz = max(2, state_sz -3)
+        else:
+            if(probability > 0.7):
+                state_sz = max(2, state_sz -2)
+            else:
+                if (probability > 0.6):
+                    state_sz = max(2, state_sz -1)
+    print 'state_sz is ' + str(state_sz)
+    return state_sz
+
+#--
+
 random.seed()
 
 tm = TwitterMarkov('example_screen_name', '/home/celesteh/Dropbox/debbie/gifs/twitter_markov/corpus.txt', config_file='/home/celesteh/Dropbox/debbie/gifs/twitter_markov/bots.yaml')
+dict = enchant.DictWithPWL("en_US",tm.config.get('dictionary_words')) #load dictionary
 
 gifs = tm.config.get('gifs')
 files = glob.glob((str(gifs) +'/out*.gif'))
 if len(files) < 15:
-    print 'WARNING: make more gifs!'
+    if len(files) == 1:
+        title = 'Last Gif'
+        remain = 'This is the last tweet you can send.'
+    else:
+        title = 'Low Gifs'
+        remain = 'There are only '+ str(len(files)) + ' gifs remianing.'
+
+    print 'WARNING: make more gifs!\n' + remain
+    pynotify.init("TrumpBot.py")
+    notification = pynotify.Notification('Low Gifs', remain, None)
+    notification.set_urgency(pynotify.URGENCY_NORMAL)
+    notification.show()
 filename = random.choice(files)
 
 print 'file is ' + filename +'\n'
@@ -284,17 +336,20 @@ print 'file is ' + filename +'\n'
 
 learn()
 
-state_size = tm.config.get('state_size')
-probability = random.triangular()
-if(probability > 0.9):
-    state_size = max(2, state_size -3)
-else:
-    if(probability > 0.8):
-        state_size = max(2, state_size -2)
-    else:
-        if (probability > 0.7):
-            state_size = max(2, state_size -1)
-print 'state_size is ' + str(state_size)
+state_size = coherence(tm.config.get('state_size'))
+#probability = random.random() #random.triangular()
+#if(probability > 0.9):
+#    state_size = max(2, state_size -4)
+#else:
+#    if(probability > 0.8):
+#        state_size = max(2, state_size -3)
+#    else:
+#        if(probability > 0.7):
+#            state_size = max(2, state_size -2)
+#        else:
+#            if (probability > 0.6):
+#                state_size = max(2, state_size -1)
+#print 'state_size is ' + str(state_size)
 
 tm.models = tm._setup_models(tm.corpora, state_size)
 
@@ -307,12 +362,16 @@ print 'checking...\n'
 while not check(tweet):
     if (tries % 10) == 0:
         learn()
+        state_size = state_size -1 #coherence(state_size)
+        tm.models = tm._setup_models(tm.corpora, state_size)
+
     tweet = tm.compose()
     tries = tries + 1
 
 de_dup(tm.config.get('history'), tm.config.get('history_size'))
 
 tweet = massage(tweet)
+tweet = defrag(tweet)
 tweet = hashtags(tweet)
 
 print 'tweet is: ' + tweet + '\n'

@@ -27,7 +27,7 @@ users:
         # This can be a single item or a list
         #
         corpus: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/corpus.txt
-        issues: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/issues.txt
+        dictionary_words: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/TrumpWords.txt
         history: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/history.txt
         gifs: /home/celesteh/Dropbox/debbie/gifs
 
