@@ -10,8 +10,8 @@ import pynotify
 import enchant
 
 
-terms = ['#Trump2016', 'WomenForTrump', 'GenderEquity', '#Equality', 'climate change', 'global warming', 'climate hoax', 'climate hustle', 'nuclear war', 'nuclear bomb', 'hydrogen bomb', 'atomic bomb', 'warhead', 'ballistic missile','nuclear missile', 'nuke', 'nuclear arms', 'arms race','proliferation', 'launch codes', '#MAGA', '#PresidentTrump']
-# 'climate change',
+terms = ['#Trump2016', 'WomenForTrump',  'global warming', 'climate hoax', 'climate hustle', '#MAGA', '#PresidentTrump']
+issues = ['GenderEquity', '#Equality', 'climate change', 'nuclear war', 'nuclear bomb', 'hydrogen bomb', 'atomic bomb', 'warhead', 'ballistic missile','nuclear missile', 'nuke', 'nuclear arms', 'arms race','proliferation', 'launch codes', '#DeusExAtomica']
 
 global unembelished
 global dict
@@ -28,9 +28,10 @@ def defrag(tweet):
     for word in words:
         if case.search(word) or single.search(word):
             text = re.sub('\W+', '', word)
-            if not dict.check(text):
-                print word
-                tweet = tweet.replace(word, ' ')
+            if len(text) <= 4:
+                if not dict.check(text):
+                    print word
+                    tweet = tweet.replace(word, ' ')
     return tweet
 
 def massage(tweet):
@@ -58,7 +59,7 @@ def massage(tweet):
     tweet = re.sub('http[s]?[\:]?', '', tweet) # strip stray https
     tweet = re.sub('\sh[t]+', '', tweet)
     tweet = re.sub('\sh[t]?\s', ' ', tweet)
-    tweet = re.sub('[0-9][0-9][0-9][0-9]?', '', tweet) #no phone numbers
+    tweet = re.sub('[0-9][0-9][0-9][ \-]?[0-9][0-9][0-9][0-9]', '', tweet) #no phone numbers
     tweet = re.sub('^[^a-z0-9A-Z_\-\#\$\'\"\(]+', '', tweet) # strip leading punctuation
     tweet = re.sub('^\s+', '', tweet) # strip leading whitespace
     #tweet = re.sub('\s+\.+', ' ', tweet) #floating dots must die
@@ -74,8 +75,10 @@ def massage(tweet):
     tweet = re.sub('\"\"+', '\"', tweet)
     tweet = re.sub('\;\;+', '\;', tweet)
     tweet = re.sub('\#\#+', '\#', tweet)
-    # doubled ! is ok
+    # doubled ! is ok tripled is enough, though
+    tweet = re.sub('\!\!\!\!+', '!!!', tweet)
     tweet = re.sub('\?+', '?!', tweet) #single ?s are insufficiently emotive
+    tweet = re.sub('\?\!+', '?!', tweet) #don't grow
 
     #end = re.compile('\n\Z')
     #if not end.search(tweet):
@@ -84,6 +87,7 @@ def massage(tweet):
     tweet = re.sub('\s+', ' ', tweet) #compress multiple spaces
     tweet = re.sub('\s+[\:\.\,\-\;\?\!\"\'\#]+\s*\Z', '', tweet) # strip trailing punctuation
     tweet = re.sub('\s+\Z', '', tweet) # strip trailing whitespace
+    tweet = re.sub('^\s+', '', tweet) # strip leading whitespace
     tweet = tweet + '\n'
 
     return tweet
@@ -138,12 +142,15 @@ def hashtags(tweet):
     #tweet = re.sub('\s+PA', ' #PA', tweet)
     tweet = re.sub('\s+NRA', ' #NRA', tweet, flags=re.I)
     tweet = re.sub('\s+GOP\W+', ' #GOP ', tweet, flags=re.I)
+    tweet = re.sub('\s+RNC', ' #RNC', tweet, flags=re.I)
+    tweet = re.sub('\s+pjnet', ' #PJNET', tweet, flags=re.I)
     tweet = re.sub('\s+New\s+York\s+Times', ' #NYTimes', tweet, flags=re.I)
     tweet = re.sub('\s+President\s*Trump', ' #PresidentTrump', tweet, count=1, flags=re.I)
     tweet = re.sub('\s+Only\s*Trump', ' #OnlyTrump', tweet, count=1, flags=re.I)
     tweet = tweet.replace(' TRUMP', ' #TRUMP') # all caps special case
     tweet = re.sub('\s+Trump', ' #Trump', tweet, count=1, flags=re.I)
     tweet = re.sub('\s+tcot', ' #tcot ', tweet, flags=re.I)
+    tweet = re.sub('\s+LeaveEU', ' #LeaveEU ', tweet, flags=re.I)
     tweet = re.sub('\s+POTUS', ' #POTUS', tweet, flags=re.I)
     #tweet = re.sub('\s+TrumpTrain', ' #TrumpTrain', tweet)
     #tweet = re.sub('\s+CA', ' #CA', tweet)
@@ -188,7 +195,7 @@ def hashtags(tweet):
     if (len(tweet) <= 92) and ('#MakeAmericaGrateAgain' not in tweet) and ('#Trump' in tweet):
         tweet = tweet + '\n#MakeAmericaGrateAgain'
     if (len(tweet) <= 92) and ('#Trump' not in tweet):
-        tweet = tweet + '\n#Trump would do better'
+        tweet = tweet + random.choice(['\n#Trump would fix this.', '\n#Trump would be better', '\n#Trump would do better', '\n#Trump will fix this.', '\nWe need #Trump.'])
 
     if (len(tweet) <= 97):
         if ('@realDonaldTrump' in tweet) or ('#Trump' not in tweet):
@@ -199,12 +206,12 @@ def hashtags(tweet):
     if (len(tweet) <= 99) and ('#PresidentTrump' not in tweet):
         tweet = tweet + '\n#PresidentTrump'
 
-    if len(tweet) <= 102:
+    if len(tweet) <= 102 and ('#AlwaysTrump' not in tweet):
         tweet = tweet + '\n#AlwaysTrump'
 
     if (len(tweet) <= 103):
         if ('#OnlyTrump' not in tweet):
-            tweet = tweet + ' #OnlyTrump'
+            tweet = tweet + '\n#OnlyTrump'
         else:
             tweet = tweet + '\n#TrumpTrain'
 
@@ -269,10 +276,9 @@ def de_dup(corpus, max=20000):
                 fp.write(tweet)
 #--
 
-def learn():
+def learn(state_size=3, propoganda=True):
 
     print 'learning....\n'
-
 
     tm.learn_peer()
     time.sleep(5)
@@ -282,13 +288,32 @@ def learn():
         tm.learn_search(query)
         time.sleep(3)
 
+    for query in issues:
+        print query
+        tm.learn_search(query, tm.config.get('issues'))
+        time.sleep(3)
+
     tm.learn_peer() #pick up new ones since search terms
     time.sleep(1)
 
     print 'de-duping'
 
     de_dup(tm.config.get('corpus'),tm.config.get('corpus_size'))
+    de_dup(tm.config.get('issues'),tm.config.get('corpus_size'))
 
+    if propoganda:
+        print 'propogranda'
+        #tm = TwitterMarkov('example_screen_name', '/home/celesteh/Dropbox/debbie/gifs/twitter_markov/issues.txt', config_file='/home/celesteh/Dropbox/debbie/gifs/twitter_markov/bots.yaml')
+        model = None
+        tm.models = tm._setup_models(tm.corpora, state_size)
+
+    else:
+        print 'issues'
+        model = os.path.basename(tm.config.get('issues'))
+        #tm = TwitterMarkov('example_screen_name', '/home/celesteh/Dropbox/debbie/gifs/twitter_markov/corpus.txt', config_file='/home/celesteh/Dropbox/debbie/gifs/twitter_markov/bots.yaml')
+        tm.models = tm._setup_models([tm.config.get('issues')], state_size)
+
+    return model
 # --
 
 def coherence(state_sz):
@@ -310,8 +335,9 @@ def coherence(state_sz):
 #--
 
 random.seed()
-
 tm = TwitterMarkov('example_screen_name', '/home/celesteh/Dropbox/debbie/gifs/twitter_markov/corpus.txt', config_file='/home/celesteh/Dropbox/debbie/gifs/twitter_markov/bots.yaml')
+
+
 dict = enchant.DictWithPWL("en_US",tm.config.get('dictionary_words')) #load dictionary
 
 gifs = tm.config.get('gifs')
@@ -334,38 +360,32 @@ filename = random.choice(files)
 print 'file is ' + filename +'\n'
 
 
-learn()
-
 state_size = coherence(tm.config.get('state_size'))
-#probability = random.random() #random.triangular()
-#if(probability > 0.9):
-#    state_size = max(2, state_size -4)
-#else:
-#    if(probability > 0.8):
-#        state_size = max(2, state_size -3)
-#    else:
-#        if(probability > 0.7):
-#            state_size = max(2, state_size -2)
-#        else:
-#            if (probability > 0.6):
-#                state_size = max(2, state_size -1)
-#print 'state_size is ' + str(state_size)
 
-tm.models = tm._setup_models(tm.corpora, state_size)
+
+length = None
+propoganda = (random.random() <= 0.4)
+if not propoganda:
+    state_size = 4
+    length = 92
+model = learn(state_size, propoganda)
+
+#tm.models = tm._setup_models(tm.corpora, state_size)
+
 
 print 'composing....\n'
-tweet = tm.compose()
+tweet = tm.compose(model = model, max_len=length)
 
 tries = 1
 
 print 'checking...\n'
 while not check(tweet):
     if (tries % 10) == 0:
-        learn()
-        state_size = state_size -1 #coherence(state_size)
-        tm.models = tm._setup_models(tm.corpora, state_size)
+        state_size = coherence(state_size -1) #coherence(state_size)
+        model = learn(state_size, propoganda)
+        #tm.models = tm._setup_models(tm.corpora, state_size)
 
-    tweet = tm.compose()
+    tweet = tm.compose(model = model, max_len=length)
     tries = tries + 1
 
 de_dup(tm.config.get('history'), tm.config.get('history_size'))

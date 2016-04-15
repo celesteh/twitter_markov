@@ -27,6 +27,7 @@ users:
         # This can be a single item or a list
         #
         corpus: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/corpus.txt
+        issues: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/issues.txt
         dictionary_words: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/TrumpWords.txt
         history: /home/celesteh/Dropbox/debbie/gifs/twitter_markov/history.txt
         gifs: /home/celesteh/Dropbox/debbie/gifs
@@ -40,7 +41,7 @@ users:
         #
         state_size: 6
 
-        corpus_size: 25000
+        corpus_size: 15000
         history_size: 250
         tweet_size: 116
 
@@ -96,6 +97,7 @@ users:
             - Lesbian
             - Transexual
             - Transsexual
+            - bathroom
             - Homosexual
             - LGBT
             - CruzCrew
