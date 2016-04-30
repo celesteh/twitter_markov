@@ -28,7 +28,7 @@ def defrag(tweet):
     for word in words:
         if case.search(word) or single.search(word):
             text = re.sub('\W+', '', word)
-            if len(text) <= 4:
+            if len(text) <= 5:
                 if not dict.check(text):
                     print word
                     tweet = tweet.replace(word, ' ')
@@ -42,8 +42,10 @@ def massage(tweet):
     tweet = tweet.replace('programme', 'program') #americanise
     tweet = tweet.replace('Programme', 'Program') #americanise
     tweet = tweet.replace('PROGRAMME', 'PROGRAM') #americanise
-    tweet = tweet.replace('RT : ', '') #Kill stray RT stuff
-    tweet = tweet.replace('RT ', ' ')
+    tweet = re.sub('^RT\s*[:]?\s+','', tweet)
+    #tweet = re.sub('RT[ ]?[:]?\w+', ' ', tweet)
+    #tweet = tweet.replace('RT : ', '') #Kill stray RT stuff
+    #tweet = tweet.replace('RT ', ' ')
     tweet = tweet.replace(' !', '') # stray punctuation
     tweet = re.sub('\s+via[\:]?\s+', ' ', tweet) # vias not helpful
     tweet = re.sub('\s+h\W+', '', tweet) #prevent stray h's
@@ -68,6 +70,11 @@ def massage(tweet):
     tweet = re.sub(r'\s+[\#\.\?\!\'\"]+\s+',' ', tweet) #floating in spaces
     tweet = re.sub('\#\s+', ' ', tweet)
     #tweet = re.sub('\.\.\.+\s*\Z', '\n', tweet) # elipses must die
+
+    #weird punct before end of line
+    tweet = re.sub('[,:\-]+\!', '!', tweet)
+    tweet = re.sub('[,:\-]+\?', '?', tweet)
+    tweet = re.sub('[,:\-]+\.', '\.', tweet)
 
     tweet = re.sub('\.\.+', '.', tweet) # doubled punctuation
     tweet = re.sub('\,\,+', ',', tweet)
@@ -149,6 +156,7 @@ def hashtags(tweet):
     tweet = re.sub('\s+Only\s*Trump', ' #OnlyTrump', tweet, count=1, flags=re.I)
     tweet = tweet.replace(' TRUMP', ' #TRUMP') # all caps special case
     tweet = re.sub('\s+Trump', ' #Trump', tweet, count=1, flags=re.I)
+    tweet = re.sub('^Trump', ' #Trump', tweet, count=1, flags=re.I)
     tweet = re.sub('\s+tcot', ' #tcot ', tweet, flags=re.I)
     tweet = re.sub('\s+LeaveEU', ' #LeaveEU ', tweet, flags=re.I)
     tweet = re.sub('\s+POTUS', ' #POTUS', tweet, flags=re.I)
@@ -173,7 +181,7 @@ def hashtags(tweet):
     for tag in tags:
         print tag
         tag = re.sub('\s+', '', tag)
-        tweet = tweet.replace(tag, ' #'+tag)
+        tweet = tweet.replace(tag, ' #'+tag+' ')
 
 
 
@@ -192,10 +200,26 @@ def hashtags(tweet):
 
 
     # If we've got extra space, let's add some #trump tags!
-    if (len(tweet) <= 92) and ('#MakeAmericaGrateAgain' not in tweet) and ('#Trump' in tweet):
-        tweet = tweet + '\n#MakeAmericaGrateAgain'
-    if (len(tweet) <= 92) and ('#Trump' not in tweet):
-        tweet = tweet + random.choice(['\n#Trump would fix this.', '\n#Trump would be better', '\n#Trump would do better', '\n#Trump will fix this.', '\nWe need #Trump.'])
+    #if (len(tweet) <= 92) and ('#MakeAmericaGrateAgain' not in tweet) and ('#Trump' in tweet):
+    #    tweet = tweet + '\n#MakeAmericaGrateAgain'
+    if (len(tweet) <= 92):
+        if ('#Trump' not in tweet):
+            tweet = tweet + random.choice(['\n#TrumpStrong!','\n#Trump is mighty',
+                    '\nStrength thru #Trump!','\nTrust in #Trump!',
+                    '\n#Trump is different.', '\n#Trump is special!',
+                    '\n#Trump will save us!','\nTurn to #Trump!','\nFaith in #Trump!',
+                    '\n#Trump would fix this.', '\n#Trump would be grate',
+                    '\n#Trump would do better', '\n#Trump will fix it.', '\nWe need #Trump.',
+                    '\n#Trump has solutions.', '\n#Trump will make deals',
+                    '\n#Trump has answers.','\n#Trump will be grate',
+                    '\n#Trump is grate.', '\nSmart ppl want #Trump', '\nHelp us, #Trump!',
+                    '\nIn #Trump we trust!', '\n#God bless #Trump!', '\n#Trump needs us!',
+                    '\nPower thru #Trump', '\n#Trump for GRATENESS!', '\n#Trump will #MAGA',
+                    '\n#Trump makes US grate', '\n#Trumpocalypse Now!!!',
+                    '', '', '' ,'', '', '', ''])
+        else:
+            if ('#MakeAmericaGrateAgain' not in tweet):
+                tweet = tweet + '\n#MakeAmericaGrateAgain'
 
     if (len(tweet) <= 97):
         if ('@realDonaldTrump' in tweet) or ('#Trump' not in tweet):
@@ -213,7 +237,7 @@ def hashtags(tweet):
         if ('#OnlyTrump' not in tweet):
             tweet = tweet + '\n#OnlyTrump'
         else:
-            tweet = tweet + '\n#TrumpTrain'
+            tweet = tweet + random.choice(['\n#TrumpTrain', '\n#TrumpTrain', '\n#TrumpTrain', '\n#TrustTrump'])
 
     if len(tweet) <= 104:
         tweet = tweet + ' #Trump2016'
@@ -274,6 +298,8 @@ def de_dup(corpus, max=20000):
         for tweet in compressed:
             if tweet:
                 fp.write(tweet)
+
+    return size
 #--
 
 def learn(state_size=3, propoganda=True):
@@ -284,12 +310,12 @@ def learn(state_size=3, propoganda=True):
     time.sleep(5)
 
     for query in terms:
-        print query
+        #print query
         tm.learn_search(query)
         time.sleep(3)
 
     for query in issues:
-        print query
+        #print query
         tm.learn_search(query, tm.config.get('issues'))
         time.sleep(3)
 
@@ -298,8 +324,24 @@ def learn(state_size=3, propoganda=True):
 
     print 'de-duping'
 
-    de_dup(tm.config.get('corpus'),tm.config.get('corpus_size'))
-    de_dup(tm.config.get('issues'),tm.config.get('corpus_size'))
+
+    # Is one of the copora files truncated?
+    target = tm.config.get('corpus_size')
+    cpsize = de_dup(tm.config.get('corpus'), target)
+    issize = de_dup(tm.config.get('issues'), target)
+
+    if propoganda:
+        size = cpsize
+    else :
+        size = issize
+
+    if (size < (target / 10)):
+        state_size = coherence(int(state_size * 0.6))
+    else :
+        if (size < (target /2)):
+            state_size = coherence(int(state_size - 1))
+
+
 
     if propoganda:
         print 'propogranda'
@@ -366,9 +408,13 @@ state_size = coherence(tm.config.get('state_size'))
 length = None
 propoganda = (random.random() <= 0.4)
 if not propoganda:
-    state_size = 4
+    #state_size = coherence(5)
     length = 92
-model = learn(state_size, propoganda)
+
+try:
+    model = learn(state_size, propoganda)
+except IOError as e:
+    exit(0)
 
 #tm.models = tm._setup_models(tm.corpora, state_size)
 
@@ -382,13 +428,20 @@ print 'checking...\n'
 while not check(tweet):
     if (tries % 10) == 0:
         state_size = coherence(state_size -1) #coherence(state_size)
-        model = learn(state_size, propoganda)
+        try:
+            model = learn(state_size, propoganda)
+        except IOError as e:
+            exit(0)
+
         #tm.models = tm._setup_models(tm.corpora, state_size)
 
     tweet = tm.compose(model = model, max_len=length)
     tries = tries + 1
-
-de_dup(tm.config.get('history'), tm.config.get('history_size'))
+    random.seed()
+try:
+    de_dup(tm.config.get('history'), tm.config.get('history_size'))
+except IOError as e:
+    exit(0)
 
 tweet = massage(tweet)
 tweet = defrag(tweet)

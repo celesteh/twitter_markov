@@ -2,15 +2,15 @@ apps:
     example_app_name:
 
         # From dev.twitter.com
-        consumer_key: '...'
-        consumer_secret: '...'
+        consumer_key: ''
+        consumer_secret: ''
 
 users:
     example_screen_name:
 
         # oauth with twitter to get these
-        key: '...'
-        secret: '...'
+        key: ''
+        secret: ''
 
         # this should match one of the apps above
         app: example_app_name
@@ -53,6 +53,7 @@ users:
             - evilword
             - fucking
             - fuck
+            - shit
             - cunt
             - cuck
             - cuckservative
@@ -98,6 +99,8 @@ users:
             - Transexual
             - Transsexual
             - bathroom
+            - toilet
+            - trans
             - Homosexual
             - LGBT
             - CruzCrew
@@ -114,11 +117,17 @@ users:
             - migration
             - LyingTed
             - LyinTed
+            - Lucifer
             - Bernie
             - Bern
             - FeelTheBern
             - MeatFreeMonday
             - Vegan
+            - Miss Atomic Bomb
+            - Fall Out Boy
+            - Lyin Ted
+            - This Ain't a Scene, It's An Arms Race
+            - This Is Not A Scene, It's An Arms Race
 
         # With these set to True, we won't tweet these types or learn them from its parent
         #
