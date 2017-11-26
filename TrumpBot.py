@@ -10,8 +10,11 @@ import pynotify
 import enchant
 
 
-terms = ['#Trump2016', 'WomenForTrump',  'global warming', 'climate hoax', 'climate hustle', '#MAGA', '#PresidentTrump']
-issues = ['GenderEquity', '#Equality', 'climate change', 'nuclear war', 'nuclear bomb', 'hydrogen bomb', 'atomic bomb', 'warhead', 'ballistic missile','nuclear missile', 'nuke', 'nuclear arms', 'arms race','proliferation', 'launch codes', '#DeusExAtomica']
+#this is just looking for partisan posts
+terms = ['#Trump2016', '#Trump2020', 'WomenForTrump',  'global warming', 'climate hoax', 'climate hustle', '#MAGA', '#PresidentTrump', '#TrumpsArmy', 'AlwaysTrump', 'TrumpTrain', 'TrumpNation']
+
+# these are subjects which are controversial in the election
+issues = ['#tcot', '#pjnet','GenderEquity', '#Equality', 'climate change', 'nuclear war', 'nuclear bomb', 'hydrogen bomb', 'atomic bomb', 'warhead', 'ballistic missile','nuclear missile', 'nuke', 'nuclear arms', 'arms race','proliferation', 'launch codes', '#DeusExAtomica']
 
 global unembelished
 global dict
@@ -172,12 +175,18 @@ def hashtags(tweet):
     tweet = re.sub('\s+MakeAmericaGrateAgain', ' #MakeAmericaGrateAgain', tweet, flags=re.I)
     tweet = re.sub('\s+[\#]*realDonaldTrump', '\n@realDonaldTrump', tweet, flags=re.I)
     tweet = re.sub('\s+MAGA\W+', ' #MAGA! ', tweet, flags=re.I)
+    tweet = re.sub('\s+Trump2016\W+', ' #Trump2020 ', tweet, flags=re.I)
 
     # tags start with upper OR lowercase letters or numbers,
     # have some numbers or lower case letters
     # and have an Upper case in the middle somewhere
     print 'find tags'
     tags = re.findall('\s+[A-Z]*[0-9a-z]+[A-Z]+\w+', tweet)
+    for tag in tags:
+        print tag
+        tag = re.sub('\s+', '', tag)
+        tweet = tweet.replace(tag, ' #'+tag+' ')
+    tags = re.findall('^[A-Z]*[0-9a-z]+[A-Z]+\w+', tweet)
     for tag in tags:
         print tag
         tag = re.sub('\s+', '', tag)
@@ -240,7 +249,7 @@ def hashtags(tweet):
             tweet = tweet + random.choice(['\n#TrumpTrain', '\n#TrumpTrain', '\n#TrumpTrain', '\n#TrustTrump'])
 
     if len(tweet) <= 104:
-        tweet = tweet + ' #Trump2016'
+        tweet = tweet + ' #Trump2020'
     if len(tweet) <= 108:
         trump = re.compile('\#Trump\W+')
         #maga = re.compile('\#MAGA[\s\.\,\!\?\;]+')
@@ -396,7 +405,10 @@ if len(files) < 15:
     pynotify.init("TrumpBot.py")
     notification = pynotify.Notification('Low Gifs', remain, None)
     notification.set_urgency(pynotify.URGENCY_NORMAL)
-    notification.show()
+    try:
+        notification.show()
+    except Exception, e:
+        print str(e)
 filename = random.choice(files)
 
 print 'file is ' + filename +'\n'
