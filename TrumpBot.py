@@ -175,7 +175,7 @@ def hashtags(tweet):
     tweet = re.sub('\s+MakeAmericaGrateAgain', ' #MakeAmericaGrateAgain', tweet, flags=re.I)
     tweet = re.sub('\s+[\#]*realDonaldTrump', '\n@realDonaldTrump', tweet, flags=re.I)
     tweet = re.sub('\s+MAGA\W+', ' #MAGA! ', tweet, flags=re.I)
-    tweet = re.sub('\s+Trump2016\W+', ' #Trump2020 ', tweet, flags=re.I)
+    tweet = re.sub('\s+[\#]*Trump2016\W+', ' #Trump2020 ', tweet, flags=re.I)
 
     # tags start with upper OR lowercase letters or numbers,
     # have some numbers or lower case letters
@@ -217,13 +217,13 @@ def hashtags(tweet):
                     '\nStrength thru #Trump!','\nTrust in #Trump!',
                     '\n#Trump is different.', '\n#Trump is special!',
                     '\n#Trump will save us!','\nTurn to #Trump!','\nFaith in #Trump!',
-                    '\n#Trump would fix this.', '\n#Trump would be grate',
-                    '\n#Trump would do better', '\n#Trump will fix it.', '\nWe need #Trump.',
+                    '\n#Trump will fix this.', '\n#Trump is grate',
+                    '\n#Trump is doing better', '\n#Trump will fix it.', '\nWe need #Trump.',
                     '\n#Trump has solutions.', '\n#Trump will make deals',
-                    '\n#Trump has answers.','\n#Trump will be grate',
-                    '\n#Trump is grate.', '\nSmart ppl want #Trump', '\nHelp us, #Trump!',
+                    '\n#Trump has answers.','\n#Trump is grate',
+                    '\n#Trump is grate.', '\nSmart ppl love #Trump', '\nHelp us, #Trump!',
                     '\nIn #Trump we trust!', '\n#God bless #Trump!', '\n#Trump needs us!',
-                    '\nPower thru #Trump', '\n#Trump for GRATENESS!', '\n#Trump will #MAGA',
+                    '\nPower thru #Trump', '\n#Trump for GRATENESS!', '\n#Trump is #MAGA',
                     '\n#Trump makes US grate', '\n#Trumpocalypse Now!!!',
                     '', '', '' ,'', '', '', ''])
         else:
